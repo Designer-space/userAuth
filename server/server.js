@@ -1,37 +1,36 @@
 import express from "express"
 import dotenv from "dotenv"
-dotenv.config();
 import cookieParser from "cookie-parser";
+import path from "path";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
+import userRoutes from "./routes/userRoutes.js"
+
 import connectDB from "./config/db.js";
 
-const port = process.env.PORT || 5000;
-import userRoutes from "./routes/userRoutes.js"
-import path from "path";
-import { fileURLToPath } from "url";
+dotenv.config();
 
-connectDB();
 const app = express();
+const port = process.env.PORT || 5000;
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
-app.use("/api/users", userRoutes)
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
-app.use(express.static(path.join(__dirname, "/client/dist")))
-app.get("*", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "/client/dist/index.html"))
-})
-
-// app.get("/", (req, res) => {
-//   res.send("server is running")
-// })
-
 app.use(notFound)
 app.use(errorHandler)
+app.use("/api/users", userRoutes)
 
-app.listen(port, () => console.log(`server started on port ${port}`))
+const __dirname = path.dirname()
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "client/dist")))
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "client", "dist", "index.html"))
+  })
+}
+
+app.listen(port, () => {
+  console.log(`server started on port ${port}`)
+  connectDB()
+})
