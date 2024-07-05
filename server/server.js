@@ -17,11 +17,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-  app.use(notFound)
-  app.use(errorHandler)
-})
+app.use(notFound)
+app.use(errorHandler)
 app.use("/api/users", userRoutes)
 
 const __dirname = path.resolve()
